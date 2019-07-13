@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  labels:
+    name: mongodb-service
+spec:
+  ports:
+  - port: 27017
+    name: port2
+    protocol: TCP
+    targetPort: 27017
+  selector:
+    name: mongo
+---
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: mongodb
+  labels:
+    name: mongodb
+spec:
+  template:
+    metadata:
+      labels:
+        name: mongodb
+      annotations:
+        app_version: latest
+    spec:
+      containers:
+      - name: mongodb-pod
+        image: registry.access.redhat.com/rhscl/mongodb-32-rhel7
+        ports:
+        - containerPort: 27017
+          protocol: TCP
+        env:
+        - name: MONGODB_USER
+          value: DEMO
+        - name: MONGODB_PASSWORD
+          value: DEMO@123
+        - name: MONGODB_DATABASE
+          value: demodatabase
+        - name: MONGODB_ADMIN_PASSWORD
+          value: my@dmIn
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 500Mi
+        volumeMounts:
+        - name: pv
+          mountPath: /var/lib/mongodb/data
+      volumes:
+      - name: pv
+        persistentVolumeClaim:
+          claimName: mongo-pv-storage
+  replicas: 1
+  selector:
+    name: mongodb
+  triggers:
+  - type: ConfigChange
+  strategy:
+    type: Rolling
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 1000

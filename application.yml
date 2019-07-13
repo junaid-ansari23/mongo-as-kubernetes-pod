@@ -1,0 +1,8 @@
+spring:
+  profiles: default  
+  cache:
+    caffeine:
+      spec: maximumSize=500, expireAfterAccess=36000s  
+  data:
+    mongodb:
+      uri: mongodb://DEMO:DEMO@123@${MONGODB_SERVICE_HOST}:27017/demodatabase
